@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 
-
+np.random.seed(1)
 alpha1 = 0.5
 alpha2 = 0.5
 mu1 = np.array([0,0])
@@ -77,7 +77,7 @@ def plot_contours(data, means, covs):
     for i in range(k):
         mean = means[i]
         cov = covs[i]
-        z_grid = multivariate_normal(mean, cov).pdf(coordinates).reshape(x_grid.shape)
+        z_grid = multivariate_normal.pdf(coordinates, mean, cov).reshape(x_grid.shape)
         plt.contour(x_grid, y_grid, z_grid, colors = col[i])
     plt.ylim(-8, 8)
     plt.grid()
