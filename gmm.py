@@ -27,61 +27,83 @@ plt.grid()
 plt.show()
 
 
-n = 2
-n_iter = 10000
-eps = 0.01
-alphas = np.ones(n)/n
-mus = X[np.random.choice(X.shape[0], n, replace = False)]
-covs = np.array([np.eye(n) for i in range(n)])
-#initializing zs - E step
-zs = np.zeros((X.shape[0], n))
-for i in range(n):
-    zs[:, i] = alphas[i] * multivariate_normal.pdf(X, mean = mus[i], cov = covs[i])
-zs = zs/np.sum(zs, axis = 1, keepdims = True)
-zs_prev = zs   
-for _ in range(n_iter): 
-    #alphas
-    alphas = np.sum(zs, axis = 0)/X.shape[0]   
-    #means
-    mus = np.dot(zs.T, X)/(np.sum(zs, axis = 0).reshape(-1, 1))
-    
-    for i in range(n):
-        vec = X - mus[i]
+
+class GMM:
+    def __init__(self, n, n_iter = 1000, eps = 0.1):
+        self.n = n
+        self.n_iter = n_iter
+        self.eps = eps
         
-        covs[i] = np.dot(zs[:, i]* vec.T, vec)/np.sum(zs, axis = 0)
+    def init_params(self, X):
+        self.X = X
+        dim = self.X.shape[1]
+        self.alphas = np.ones(self.n)/self.n
+        #mus - random n rows of X
+        self.mus = X[np.random.choice(self.X.shape[0], self.n, replace = False)]
+        self.covs = np.array([np.eye(dim) for _ in range(self.n)])
     
-    for i in range(n):
-        zs[:, i] = alphas[i] * multivariate_normal.pdf(X, mean = mus[i], cov = covs[i])
-    zs = zs/np.sum(zs, axis = 1, keepdims = True)
+    def update_zs(self):
+        for i in range(self.n):
+            self.zs[:, i] = self.alphas[i] * multivariate_normal.pdf(X, mean = self.mus[i], cov = self.covs[i])
+        self.zs = self.zs/np.sum(self.zs, axis = 1, keepdims = True)
+        
+    def init_zs(self):
+        self.zs = np.zeros((self.X.shape[0], self.n))
+        for i in range(self.n):
+            self.zs[:, i] = self.alphas[i] * multivariate_normal.pdf(X, mean = self.mus[i], cov = self.covs[i])
+        self.zs = self.zs/np.sum(self.zs, axis = 1, keepdims = True)
+        
+        
+    def compute_alpha(self):
+        self.alphas = np.sum(self.zs, axis = 0)/self.X.shape[0]  
+        
+    def compute_mu(self):
+        self.mus = np.dot(self.zs.T, X)/(np.sum(self.zs, axis = 0)).reshape(-1, 1)
     
-    if np.linalg.norm(zs - zs_prev) < eps:
-        break
-    else:
-        zs_prev = zs
+    def compute_cov(self):
+        for i in range(self.n):
+            vec = self.X - self.mus[i]          
+            self.covs[i] = np.dot(self.zs[:, i]* vec.T, vec)/np.sum(self.zs, axis = 0)[i]
+            
+    def fit(self, X):
+        self.init_params(X)
+        self.init_zs()
+        zs_prev = np.copy(self.zs)
+        for _ in range(self.n_iter):
+            self.compute_alpha()
+            self.compute_mu()
+            self.compute_cov()
+            self.update_zs()
+            zs_prev = np.copy(self.zs)
+            if np.linalg.norm(self.zs - zs_prev) < self.eps:
+                break
+            
+    def predict(self):
+        self.clusters = np.argmax(self.zs, axis = 1)
+        return self.clusters
+     
+    def plot_predictions(self):
+        for i, cluster in enumerate(np.unique(self.clusters)):
+            c = self.X[preds == i]
+            plt.plot(c[:, 0], c[:, 1], '.', alpha=1, color = np.random.rand(3,))
+        plt.grid()
+        plt.show()
     
-    
+        
+        
+gmm = GMM(n = 10)
+gmm.fit(X)
 
-def plot_contours(data, means, covs):
-    
-    plt.figure()
-    plt.plot(data[:, 0], data[:, 1], '.', alpha=1, color = "black")
+preds = gmm.predict()
+gmm.plot_predictions()
 
-    
-    k = means.shape[0]
-    x = np.linspace(-10, 30, 1000)
-    y = np.linspace(-8, 8, 1000)
-    x_grid, y_grid = np.meshgrid(x, y)
-    coordinates = np.array([x_grid.ravel(), y_grid.ravel()]).T
 
-    col = ['green', 'red']
-    for i in range(k):
-        mean = means[i]
-        cov = covs[i]
-        z_grid = multivariate_normal.pdf(coordinates, mean, cov).reshape(x_grid.shape)
-        plt.contour(x_grid, y_grid, z_grid, colors = col[i])
-    plt.ylim(-8, 8)
-    plt.grid()
-    plt.show()
 
-plot_contours(X, mus, covs)
+
+
+
+
+
+
+
 
