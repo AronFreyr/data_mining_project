@@ -10,8 +10,6 @@ from scipy.stats import multivariate_normal
 from sklearn.metrics import silhouette_score
 from mpl_toolkits import mplot3d
 
-matplotlib.use('TkAgg')  # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
-
 
 def generate_data_for_gmm(show_plot=True):
     # generating data
@@ -27,9 +25,15 @@ def generate_data_for_gmm(show_plot=True):
     X2 = multivariate_normal.rvs(mu2, cov2, size=100, random_state=1)
     X = np.vstack((X1, X2))
     X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
+    try:
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
+    except AttributeError:
+        # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
+        matplotlib.use('TkAgg')
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
 
-    plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-    plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
     plt.ylim(-8, 8)
     plt.grid()
     if show_plot:
