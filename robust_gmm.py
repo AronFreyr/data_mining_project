@@ -93,12 +93,13 @@ for w in range(max_iter):
     cs.append(c)
     alphas = alphas[~idx]/np.sum(alphas[~idx])
     zs = zs[:, ~idx]/np.sum(zs[:, ~idx], axis = 1, keepdims = True)
-    mus = mus[~idx]
+    
     
     if w >= 60 and c[w-60] - c[w] == 0:
         beta = 0
     
     #STEP 8
+    mus = mus[~idx]
     arr = []
     for i in range(c):
         vec = X - mus[i]          
