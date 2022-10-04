@@ -42,13 +42,16 @@ X = generate_data_for_gmm()
 #step 1
 
 
-eps = 0.01
+eps = 0.001
 beta = 1
-c = X.shape[0]     #TODO make c input, if c is None then c is n
+gamma = 0.0001
+max_iter = 1000
+c = X.shape[0] #TODO make c input, if c is None then c is n
+n =  X.shape[0]    
 d = X.shape[1]
 alphas = np.ones(c)/c
 mus = np.copy(X[np.random.choice(X.shape[0], c, replace=False)])
-
+cs = [c]
 #eq 27
 Dks = np.zeros((c, X.shape[0]))
 for k in range(c):
@@ -58,7 +61,7 @@ for k in range(c):
     Dks[k] = np.sort(Dks[k])[::-1]
             
 covs = np.array([Dks[k][Dks[k] > 0][int(np.sqrt(c))] * np.eye(d) for k in range(c)])
-
+Q = np.min(Dks[Dks > 0])* np.eye(d)
 #STEP 3
 zs = np.zeros((X.shape[0], c))
 for i in range(c):
@@ -66,20 +69,78 @@ for i in range(c):
 zs = zs/np.sum(zs, axis=1, keepdims=True)
 
 #STEP 4
-mus = np.dot(zs.T, X)/(np.sum(zs, axis=0)).reshape(-1, 1)
+for w in range(max_iter):
+    mus = np.dot(zs.T, X)/(np.sum(zs, axis=0)).reshape(-1, 1)
+    
+    #STEP 5
+    alphas_em = np.sum(zs, axis = 0)/X.shape[0]
+    alphas_old = np.copy(alphas)
+    E = np.sum(alphas_old*np.log(alphas_old))
+    alphas = alphas_em + beta*alphas_old*(np.log(alphas_old) - E)
+    
+    #STEP 6
+    power = np.trunc(d/2 - 1)
+    eta = min(1, power)
+    v1 = np.sum(np.exp(-eta*(alphas - alphas_old)))/c
+    v2 = (1 - max(alphas_em))/(-max(alphas_old)*E)
+    beta = min(v1, v2)
+    
+    
+    #STEP 7
+    idx = alphas < 1 / n
+    size = len(alphas[alphas < 1 / n])
+    c = c - size
+    cs.append(c)
+    alphas = alphas[~idx]/np.sum(alphas[~idx])
+    zs = zs[:, ~idx]/np.sum(zs[:, ~idx], axis = 1, keepdims = True)
+    mus = mus[~idx]
+    
+    if w >= 60 and c[w-60] - c[w] == 0:
+        beta = 0
+    
+    #STEP 8
+    arr = []
+    for i in range(c):
+        vec = X - mus[i]          
+        #26
+        covs[i] = np.dot(zs[:, i]*vec.T, vec)/np.sum(zs, axis=0)[i]
+        #28
+        covs[i] = ((1-gamma)*covs[i]) + (gamma*Q)
+        arr.append(np.copy(covs[i]))
+    covs = np.array(arr)
+    
+    
+    #STEP 9
+    for i in range(c):
+        zs[:, i] = alphas[i] * multivariate_normal.pdf(X, mean=mus[i], cov=covs[i])
+    zs = zs/np.sum(zs, axis=1, keepdims=True)
+    
+    #STEP 10
+    mus_prev = np.copy(mus)
+    mus = np.dot(zs.T, X)/(np.sum(zs, axis=0)).reshape(-1, 1)
+    
+    #STEP 11
+    if max([np.linalg.norm(mus[k] - mus_prev[k]) for k in range(c)]) < eps:
+        break
 
-#STEP 5
-alphas_em = np.sum(zs, axis = 0)/X.shape[0]
-alphas_old = np.copy(alphas)
-E = np.sum(alphas_old*np.log(alphas_old))
-alphas = alphas_em + beta*alphas_old*(np.log(alphas_old) - E)
 
-#STEP 6
-power = np.trunc(d/2 - 1)
-eta = min(1, power)
-v1 = np.sum(np.exp(-eta*(alphas - alphas_old)))/c
-v2 = (1 - max(alphas_em))/(-max(alphas_old)*E)
-beta = min(v1, v2)
+
+
+
+clusters = np.argmax(zs, axis=1)
+for i, cluster in enumerate(np.unique(clusters)):
+    c = X[clusters == i]
+    plt.plot(c[:, 0], c[:, 1], '.', alpha=1, color=np.random.rand(3,))
+plt.grid()
+plt.show()
+
+
+
+
+
+
+
+
 
 
 
