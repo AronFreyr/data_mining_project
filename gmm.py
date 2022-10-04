@@ -112,10 +112,24 @@ class GMM:
             if np.linalg.norm(self.zs - zs_prev) < self.eps:
                 break
             
-    def predict(self):
+    def make_clusters(self):
+        # make clusters for data provided
         # zs are probabilities of belonging to each class
         self.clusters = np.argmax(self.zs, axis=1)
         return self.clusters
+    
+    def predict(self, Y):
+        #predict on unseen data
+        #find to which cluster Mahalenobis distance is minimized
+        dists = []
+        for p in range(Y.shape[0]):
+            lista = []
+            for i in range(len(self.mus)):
+                delta = Y[p] - self.mus[i]
+                m = np.dot(np.dot(delta, np.linalg.inv(self.covs[i])), delta)
+                lista.append(np.sqrt(m))
+            dists.append(np.argmin(lista))
+        return np.array(dists)
      
     def plot_predictions(self):
         if self.dim <= 3:
@@ -161,7 +175,8 @@ if __name__ == '__main__':
     gmm = GMM(n=2)
     gmm.fit(X)
 
-    preds = gmm.predict()
+    preds = gmm.make_clusters()
+    preds2 = gmm.predict(X)
     gmm.plot_predictions()
 
     np.random.seed(1)
@@ -179,6 +194,6 @@ if __name__ == '__main__':
 
     gmm = GMM(n=2)
     gmm.fit(X)
-    preds = gmm.predict()
+    preds = gmm.make_clusters()
     gmm.plot_predictions()
 
