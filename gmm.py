@@ -162,7 +162,7 @@ class GMM:
                 plt.grid()
                 plt.show()
         else:
-            raise ValueError("This method can only plot 3D data")
+            raise ValueError("This method can only plot 1-3D data")
 
     def silhouette(self):
         return silhouette_score(self.X, self.clusters)
