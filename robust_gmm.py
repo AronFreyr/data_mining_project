@@ -61,11 +61,10 @@ class RobustGMM:
     def init_covariance(self):
         Dks = np.zeros((self.c, self.n))
         for k in range(self.c):
-            for i in range(self.n):
-                if i != k:
-                    Dks[k][i] = np.linalg.norm(self.X[i] - self.mus[k])**2
-            Dks[k] = np.sort(Dks[k])[::-1]
-        self.covs = np.array([Dks[k][Dks[k] > 0][int(np.sqrt(self.c))] * np.eye(self.d) for k in range(self.c)])
+            for i in range(self.n):             
+                Dks[k][i] = np.linalg.norm(self.X[i] - self.mus[k])**2
+            Dks[k] = np.sort(Dks[k])
+        self.covs = np.array([Dks[k][Dks[k] > 0][int(np.ceil(np.sqrt(self.c)))] * np.eye(self.d) for k in range(self.c)])
         self.Q = np.min(Dks[Dks > 0])* np.eye(self.d)
         
     def update_zs(self):     
@@ -98,7 +97,7 @@ class RobustGMM:
         self.alphas = self.alphas[~self.idx]/np.sum(self.alphas[~self.idx])
         self.zs = self.zs[:, ~self.idx]/np.sum(self.zs[:, ~self.idx], axis = 1, keepdims = True)
         
-        if self.w >= 60 and self.c[self.w-60] - self.c[self.w] == 0:
+        if self.w >= 60 and self.cs[self.w-60] - self.cs[self.w] == 0:
             self.beta = 0
             self.if_beta = False
             
@@ -152,7 +151,7 @@ class RobustGMM:
             if self.d == 2:
                 for i, cluster in enumerate(np.unique(self.clusters)):
                     c = self.X[self.clusters == i]
-                    plt.plot(c[:, 0], c[:, 1], '.', alpha=1, color=np.random.rand(3,))
+                    plt.plot(c[:, 0], c[:, 1], '.', alpha=1, color=np.append(np.random.rand(3,), 0.2))
                 plt.grid()
                 plt.show()
 
@@ -160,7 +159,7 @@ class RobustGMM:
                 ax = plt.axes(projection='3d')
                 for i, cluster in enumerate(np.unique(self.clusters)):
                     c = self.X[self.clusters == i]
-                    ax.scatter3D(c[:, 0], c[:, 1],  c[:, 2], alpha=1, color=np.random.rand(3,))
+                    ax.scatter3D(c[:, 0], c[:, 1],  c[:, 2], alpha=1, color=np.append(np.random.rand(3,), 0.2))
                 plt.grid()
                 plt.show()
         else:
