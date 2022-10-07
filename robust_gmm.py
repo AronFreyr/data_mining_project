@@ -9,37 +9,6 @@ from scipy.stats import multivariate_normal
 from sklearn.metrics import silhouette_score
 from mpl_toolkits import mplot3d
 
-def generate_data_for_gmm(show_plot=True):
-    # generating data
-    np.random.seed(1)
-    alpha1 = 0.5
-    alpha2 = 0.5
-    mu1 = np.array([0, 0])
-    mu2 = np.array([20, 0])
-    cov1 = np.array([[1, 0], [0, 1]])
-    cov2 = np.array([[9, 0], [0, 9]])
-
-    X1 = multivariate_normal.rvs(mu1, cov1, size=400, random_state=1)
-    X2 = multivariate_normal.rvs(mu2, cov2, size=100, random_state=1)
-    X = np.vstack((X1, X2))
-    X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
-    try:
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
-    except AttributeError:
-        # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
-        matplotlib.use('TkAgg')
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
-
-    plt.ylim(-8, 8)
-    plt.grid()
-    if show_plot:
-        plt.show()
-    return X
-X = generate_data_for_gmm()
-
-#step 1
 class RobustGMM:
     
     def __init__(self, c = None, eps = 0.001, gamma = 0.0001, max_iter = 1000):
@@ -59,7 +28,7 @@ class RobustGMM:
         self.mus = np.copy(self.X[np.random.choice(self.n, self.c, replace=False)])
         self.cs = [self.c]
         self.zs = np.zeros((self.n, self.c))
-        
+        self.if_beta = True
     def fit(self, X):
         #step 1
         self.init_params(X)
@@ -113,11 +82,12 @@ class RobustGMM:
         self.alphas = self.alphas_em + self.beta*self.alphas_old*(np.log(self.alphas_old) - self.E)
         
     def update_beta(self):
-        power = np.trunc(self.d/2 - 1)
-        eta = min(1, power)
-        v1 = np.sum(np.exp(-eta*(self.alphas - self.alphas_old)))/self.c
-        v2 = (1 - max(self.alphas_em))/(-max(self.alphas_old)*self.E)
-        self.beta = min(v1, v2)
+        if self.if_beta:
+            power = np.trunc(self.d/2 - 1)
+            eta = min(1, power)
+            v1 = np.sum(np.exp(-eta*(self.alphas - self.alphas_old)))/self.c
+            v2 = (1 - max(self.alphas_em))/(-max(self.alphas_old)*self.E)
+            self.beta = min(v1, v2)
     
     def update_c(self):
         self.idx = self.alphas < 1/self.n
@@ -129,7 +99,7 @@ class RobustGMM:
         
         if self.w >= 60 and self.c[self.w-60] - self.c[self.w] == 0:
             self.beta = 0
-            
+            self.if_beta = False
     def update_covs(self):
         self.mus = self.mus[~self.idx]
         arr = []
@@ -167,7 +137,7 @@ class RobustGMM:
                 X_with_preds = np.c_[self.X, self.clusters]
                 colors = [np.random.rand(3,) for _ in range(self.n)]
                 for i in range(self.X.shape[0]):
-                    plt.plot(X[i], '.', alpha=1, color=colors[int(X_with_preds[i][1])])
+                    plt.plot(self.X[i], '.', alpha=1, color=colors[int(X_with_preds[i][1])])
                 plt.grid()
                 plt.tick_params(
                     axis='x',          
@@ -195,11 +165,6 @@ class RobustGMM:
             raise ValueError("This method can only plot 1-3D data")
 
 
-rgmm = RobustGMM()
-rgmm.fit(X)
-preds = rgmm.predict(X)
-rgmm.make_clusters()
-rgmm.plot_predictions()
 
 
 
