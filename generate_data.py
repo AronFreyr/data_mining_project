@@ -8,7 +8,6 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
-from robust_gmm import RobustGMM
 
 def data_example_1(show_plot=True):
     # generating data
@@ -168,7 +167,6 @@ def data_example_6(show_plot=True):
     if show_plot:
         plt.show()
     return X
-
 
 
 

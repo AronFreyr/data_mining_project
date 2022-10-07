@@ -9,7 +9,6 @@ from scipy.stats import multivariate_normal
 from sklearn.metrics import silhouette_score
 from mpl_toolkits import mplot3d
 
-#step 1
 class RobustGMM:
     
     def __init__(self, c = None, eps = 0.001, gamma = 0.0001, max_iter = 1000):
@@ -29,7 +28,7 @@ class RobustGMM:
         self.mus = np.copy(self.X[np.random.choice(self.n, self.c, replace=False)])
         self.cs = [self.c]
         self.zs = np.zeros((self.n, self.c))
-        
+        self.if_beta = True
     def fit(self, X):
         #step 1
         self.init_params(X)
@@ -83,11 +82,12 @@ class RobustGMM:
         self.alphas = self.alphas_em + self.beta*self.alphas_old*(np.log(self.alphas_old) - self.E)
         
     def update_beta(self):
-        power = np.trunc(self.d/2 - 1)
-        eta = min(1, power)
-        v1 = np.sum(np.exp(-eta*(self.alphas - self.alphas_old)))/self.c
-        v2 = (1 - max(self.alphas_em))/(-max(self.alphas_old)*self.E)
-        self.beta = min(v1, v2)
+        if self.if_beta:
+            power = np.trunc(self.d/2 - 1)
+            eta = min(1, power)
+            v1 = np.sum(np.exp(-eta*(self.alphas - self.alphas_old)))/self.c
+            v2 = (1 - max(self.alphas_em))/(-max(self.alphas_old)*self.E)
+            self.beta = min(v1, v2)
     
     def update_c(self):
         self.idx = self.alphas < 1/self.n
@@ -99,7 +99,7 @@ class RobustGMM:
         
         if self.w >= 60 and self.c[self.w-60] - self.c[self.w] == 0:
             self.beta = 0
-            
+            self.if_beta = False
     def update_covs(self):
         self.mus = self.mus[~self.idx]
         arr = []
@@ -137,7 +137,7 @@ class RobustGMM:
                 X_with_preds = np.c_[self.X, self.clusters]
                 colors = [np.random.rand(3,) for _ in range(self.n)]
                 for i in range(self.X.shape[0]):
-                    plt.plot(self.X[i], '.', alpha=1, color=colors[int(self.X_with_preds[i][1])])
+                    plt.plot(self.X[i], '.', alpha=1, color=colors[int(X_with_preds[i][1])])
                 plt.grid()
                 plt.tick_params(
                     axis='x',          
@@ -163,6 +163,14 @@ class RobustGMM:
                 plt.show()
         else:
             raise ValueError("This method can only plot 1-3D data")
+
+
+
+
+
+
+
+
 
 
 
