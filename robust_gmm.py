@@ -29,6 +29,7 @@ class RobustGMM:
         self.cs = [self.c]
         self.zs = np.zeros((self.n, self.c))
         self.if_beta = True
+        
     def fit(self, X):
         #step 1
         self.init_params(X)
@@ -85,7 +86,7 @@ class RobustGMM:
         if self.if_beta:
             power = np.trunc(self.d/2 - 1)
             eta = min(1, power)
-            v1 = np.sum(np.exp(-eta*(self.alphas - self.alphas_old)))/self.c
+            v1 = np.sum(np.exp(-eta*self.n*(self.alphas - self.alphas_old)))/self.c
             v2 = (1 - max(self.alphas_em))/(-max(self.alphas_old)*self.E)
             self.beta = min(v1, v2)
     
@@ -100,6 +101,7 @@ class RobustGMM:
         if self.w >= 60 and self.c[self.w-60] - self.c[self.w] == 0:
             self.beta = 0
             self.if_beta = False
+            
     def update_covs(self):
         self.mus = self.mus[~self.idx]
         arr = []
