@@ -124,7 +124,7 @@ def data_example_5(show_plot=True):
     X3 = multivariate_normal.rvs(mu3, cov3, size=200, random_state=1)
     X4 = multivariate_normal.rvs(mu4, cov4, size=200, random_state=1)
     X5 = multivariate_normal.rvs(mu5, cov5, size=200, random_state=1)
-    X = np.vstack((X1, X2, X3, X4))
+    X = np.vstack((X1, X2, X3, X4, X5))
     X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
     try:
         plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")

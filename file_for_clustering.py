@@ -13,3 +13,4 @@ rgmm = RobustGMM()
 rgmm.fit(X)
 rgmm.make_clusters()
 rgmm.plot_predictions()
+
