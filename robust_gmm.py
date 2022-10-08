@@ -20,12 +20,15 @@ class RobustGMM:
         
     def init_params(self, X):
         self.X = X
-        if self.c is None:
-            self.c = X.shape[0]
+        
         self.n = self.X.shape[0]
         self.d = self.X.shape[1]
+        if self.c is None:
+            self.c = X.shape[0]
+            self.mus = np.copy(self.X)
+        else:
+            self.mus = np.copy(self.X[np.random.choice(self.n, self.c, replace=False)])
         self.alphas = np.ones(self.c)/self.c
-        self.mus = np.copy(self.X[np.random.choice(self.n, self.c, replace=False)])
         self.cs = [self.c]
         self.zs = np.zeros((self.n, self.c))
         self.if_beta = True
@@ -64,7 +67,7 @@ class RobustGMM:
             for i in range(self.n):             
                 Dks[k][i] = np.linalg.norm(self.X[i] - self.mus[k])**2
             Dks[k] = np.sort(Dks[k])
-        self.covs = np.array([Dks[k][Dks[k] > 0][int(np.ceil(np.sqrt(self.c)))] * np.eye(self.d) for k in range(self.c)])
+        self.covs = np.array([Dks[k][Dks[k] > 0][int(np.sqrt(self.c))] * np.eye(self.d) for k in range(self.c)])
         self.Q = np.min(Dks[Dks > 0])* np.eye(self.d)
         
     def update_zs(self):     
@@ -84,8 +87,8 @@ class RobustGMM:
     def update_beta(self):
         if self.if_beta:
             power = np.trunc(self.d/2 - 1)
-            eta = min(1, power)
-            v1 = np.sum(np.exp(-eta*self.n*(self.alphas - self.alphas_old)))/self.c
+            eta = min(1, 0.5 ** power)
+            v1 = np.sum(np.exp(-eta*self.n*np.abs(self.alphas - self.alphas_old)))/self.c
             v2 = (1 - max(self.alphas_em))/(-max(self.alphas_old)*self.E)
             self.beta = min(v1, v2)
     
@@ -133,12 +136,13 @@ class RobustGMM:
         return np.array(dists)
      
     def plot_predictions(self):
+        np.random.seed(1)
         if self.d <= 3:
             if self.d == 1:
                 X_with_preds = np.c_[self.X, self.clusters]
                 colors = [np.random.rand(3,) for _ in range(self.n)]
                 for i in range(self.X.shape[0]):
-                    plt.plot(self.X[i], '.', alpha=1, color=colors[int(X_with_preds[i][1])])
+                    plt.plot(self.X[i], '.', color=colors[int(X_with_preds[i][1])])
                 plt.grid()
                 plt.tick_params(
                     axis='x',          
@@ -149,9 +153,10 @@ class RobustGMM:
                 plt.show()
                     
             if self.d == 2:
+                fig, ax = plt.subplots()
                 for i, cluster in enumerate(np.unique(self.clusters)):
                     c = self.X[self.clusters == i]
-                    plt.plot(c[:, 0], c[:, 1], '.', alpha=1, color=np.append(np.random.rand(3,), 0.2))
+                    ax.scatter(c[:, 0], c[:, 1], s = 20, color=np.append(np.random.rand(3,), 0.5))
                 plt.grid()
                 plt.show()
 
@@ -159,7 +164,7 @@ class RobustGMM:
                 ax = plt.axes(projection='3d')
                 for i, cluster in enumerate(np.unique(self.clusters)):
                     c = self.X[self.clusters == i]
-                    ax.scatter3D(c[:, 0], c[:, 1],  c[:, 2], alpha=1, color=np.append(np.random.rand(3,), 0.2))
+                    ax.scatter3D(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black")
                 plt.grid()
                 plt.show()
         else:
