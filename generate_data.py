@@ -31,7 +31,6 @@ def data_example_1(show_plot=True):
         plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
     plt.title("True data")
     plt.legend()
-    plt.ylim(-8, 8)
     plt.grid()
     if show_plot:
         plt.show()
@@ -51,7 +50,7 @@ def data_example_1_3D(show_plot=True):
     X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
     try:
         fig = plt.figure(1, figsize=(8, 6))
-        ax = fig.add_subplot(111, projection="3d", elev=-150, azim=110)
+        ax = fig.add_subplot(111, projection="3d")
         ax.scatter(X1[:, 0], X1[:, 1], X1[:, 2], c="red", cmap=plt.cm.Set1, edgecolor="k", s=40, label = 1)
         ax.scatter(X2[:, 0], X2[:, 1], X2[:, 2], c="blue", cmap=plt.cm.Set1, edgecolor="k", s=40, label = 2)
         ax.legend()
@@ -64,7 +63,6 @@ def data_example_1_3D(show_plot=True):
         ax.scatter(X2[:, 0], X2[:, 1], X2[:, 2], c="blue", cmap=plt.cm.Set1, edgecolor="k", s=40, label = 2)
         ax.legend()
     plt.title("True data")
-    plt.ylim(-8, 8)
     plt.grid()
     if show_plot:
         plt.show()
@@ -98,7 +96,6 @@ def data_example_2(show_plot=True):
         plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label = 3)
         plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
     plt.title("True data")
-    plt.ylim(0, 8)
     plt.grid()
     plt.legend()
     if show_plot:
@@ -134,7 +131,6 @@ def data_example_3(show_plot=True):
         plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label = 3)
         plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
     plt.title("True data")
-    plt.ylim(-15, 8)
     plt.grid()
     plt.legend()
     if show_plot:
@@ -177,7 +173,6 @@ def data_example_5(show_plot=True):
         plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
         plt.plot(X5[:, 0], X5[:, 1], '.', alpha=1, color="orange", label = 5)
     plt.title("True data")
-    plt.ylim(-8, 8)
     plt.grid()
     plt.legend()
     if show_plot:
@@ -208,6 +203,45 @@ def data_example_6(show_plot=True):
         plt.show()
     return X
 
-
-
-
+def data_example_7(show_plot = True):
+    X = np.empty((0, 3))
+    fig = plt.figure(1, figsize=(8, 6))
+    ax = fig.add_subplot(111, projection="3d")
+    real_means = np.array([[-5, -10, 0],
+                       [0, -10, 0],
+                       [5, -10, 0],
+                       [-5, -0, 4],
+                       [0, -0, 4],
+                       [5, -0, 4],
+                       [-5, 10, 8],
+                       [0, 10, 8],
+                       [5, 10, 8]])
+    real_covs = np.array([[[.5, 0, 0], [0, 2, 0], [0, 0, 1]],
+                      [[1, 0, 0], [0, 2, 0], [0, 0, 1]],
+                      [[.5, 0, 0], [0, 2, 0], [0, 0, 1]],
+                      [[.5, 0, 0], [0, 8, 0], [0, 0, 2]],
+                      [[1, 0, 0], [0, 8, 0], [0, 0, 2]],
+                      [[.5, 0, 0], [0, 8, 0], [0, 0, 2]],
+                      [[.5, 0, 0], [0, 2, 0], [0, 0, 1]],
+                      [[1, 0, 0], [0, 2, 0], [0, 0, 1]],
+                      [[.5, 0, 0], [0, 2, 0], [0, 0, 1]]])
+    mix_prob = np.array([1/16, 2/16, 1/16, 2/16, 4/16, 2/16, 1/16, 2/16, 1/16])
+    for i in range(len(real_means)):
+        xs = multivariate_normal.rvs(real_means[i], real_covs[i], size=int(mix_prob[i]*1600), random_state=1)
+        try:
+            
+            ax.scatter(xs[:, 0], xs[:, 1], xs[:, 2], color=np.append(np.random.rand(3,), 0.5), cmap=plt.cm.Set1, edgecolor="k", s=40, label = i+1)
+            ax.legend()
+        except AttributeError:
+            # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
+            matplotlib.use('TkAgg')
+            ax.scatter(xs[:, 0], xs[:, 1], xs[:, 2], color=np.append(np.random.rand(3,), 0.5), cmap=plt.cm.Set1, edgecolor="k", s=40, label = i+1)
+        X = np.vstack((X, xs))
+    X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
+    ax.legend()
+    plt.grid()
+    plt.legend()
+    plt.title("True data")
+    if show_plot:
+        plt.show()
+    return X

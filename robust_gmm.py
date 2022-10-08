@@ -158,9 +158,9 @@ class RobustGMM:
                 for i, cluster in enumerate(np.unique(self.clusters)):
                     c = self.X[self.clusters == i]
                     if np.unique(len(np.unique(self.clusters))) < 6:
-                        ax.scatter(c[:, 0], c[:, 1], color=np.append(np.random.rand(3,), 0.5), edgecolor = "k", linewidth = 0.3, label = i+1)
+                        ax.scatter(c[:, 0], c[:, 1], color=np.append(np.random.rand(3,), 0.5), edgecolor = "k", linewidth = 0.3, label = i+1, zorder = 2)
                     else:
-                        ax.scatter(c[:, 0], c[:, 1], color=np.append(np.random.rand(3,), 0.5), edgecolor = "k", linewidth = 0.3)
+                        ax.scatter(c[:, 0], c[:, 1], color=np.append(np.random.rand(3,), 0.5), edgecolor = "k", linewidth = 0.3, zorder = 2)
                 ax.legend()
                 plt.title("Clustering results")
                 plt.grid()
@@ -168,13 +168,13 @@ class RobustGMM:
 
             if self.d == 3:
                 fig = plt.figure(1, figsize=(8, 6))
-                ax = fig.add_subplot(111, projection="3d", elev=-150, azim=110)
+                ax = fig.add_subplot(111, projection="3d")
                 for i, cluster in enumerate(np.unique(self.clusters)):
                     c = self.X[self.clusters == i]
-                    if np.unique(len(np.unique(self.clusters))) < 6:
-                        ax.scatter(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black", label  = i+1)
+                    if np.unique(len(np.unique(self.clusters))) < 10:
+                        ax.scatter(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black", label  = i+1, zorder = 2)
                     else:
-                        ax.scatter(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black")
+                        ax.scatter(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black", zorder = 2)
                 plt.title("Clustering results")
                 ax.legend()
                 plt.grid()
