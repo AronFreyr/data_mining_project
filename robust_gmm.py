@@ -150,21 +150,33 @@ class RobustGMM:
                     bottom=False,      
                     top=False,         
                     labelbottom=False)
+                plt.title("Clustering results")
                 plt.show()
                     
             if self.d == 2:
                 fig, ax = plt.subplots()
                 for i, cluster in enumerate(np.unique(self.clusters)):
                     c = self.X[self.clusters == i]
-                    ax.scatter(c[:, 0], c[:, 1], s = 20, color=np.append(np.random.rand(3,), 0.5))
+                    if np.unique(len(np.unique(self.clusters))) < 6:
+                        ax.scatter(c[:, 0], c[:, 1], color=np.append(np.random.rand(3,), 0.5), edgecolor = "k", linewidth = 0.3, label = i+1)
+                    else:
+                        ax.scatter(c[:, 0], c[:, 1], color=np.append(np.random.rand(3,), 0.5), edgecolor = "k", linewidth = 0.3)
+                ax.legend()
+                plt.title("Clustering results")
                 plt.grid()
                 plt.show()
 
             if self.d == 3:
-                ax = plt.axes(projection='3d')
+                fig = plt.figure(1, figsize=(8, 6))
+                ax = fig.add_subplot(111, projection="3d", elev=-150, azim=110)
                 for i, cluster in enumerate(np.unique(self.clusters)):
                     c = self.X[self.clusters == i]
-                    ax.scatter3D(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black")
+                    if np.unique(len(np.unique(self.clusters))) < 6:
+                        ax.scatter(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black", label  = i+1)
+                    else:
+                        ax.scatter(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black")
+                plt.title("Clustering results")
+                ax.legend()
                 plt.grid()
                 plt.show()
         else:

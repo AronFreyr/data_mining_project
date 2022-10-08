@@ -12,26 +12,58 @@ from scipy.stats import multivariate_normal
 def data_example_1(show_plot=True):
     # generating data
     np.random.seed(1)
-    alpha1 = 0.5
-    alpha2 = 0.5
     mu1 = np.array([0, 0])
     mu2 = np.array([20, 0])
     cov1 = np.array([[1, 0], [0, 1]])
     cov2 = np.array([[9, 0], [0, 9]])
 
     X1 = multivariate_normal.rvs(mu1, cov1, size=400, random_state=1)
-    X2 = multivariate_normal.rvs(mu2, cov2, size=100, random_state=1)
+    X2 = multivariate_normal.rvs(mu2, cov2, size=400, random_state=1)
     X = np.vstack((X1, X2))
     X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
     try:
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label = 1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
     except AttributeError:
         # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
         matplotlib.use('TkAgg')
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label = 1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
+    plt.title("True data")
+    plt.legend()
+    plt.ylim(-8, 8)
+    plt.grid()
+    if show_plot:
+        plt.show()
+    return X
 
+def data_example_1_3D(show_plot=True):
+    # generating data
+    np.random.seed(1)
+    mu1 = np.array([0, 0, 0])
+    mu2 = np.array([20, 0, 0])
+    cov1 = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    cov2 = np.array([[9, 0, 0], [0, 9, 0], [0, 0, 9]])
+
+    X1 = multivariate_normal.rvs(mu1, cov1, size=400, random_state=1)
+    X2 = multivariate_normal.rvs(mu2, cov2, size=400, random_state=1)
+    X = np.vstack((X1, X2))
+    X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
+    try:
+        fig = plt.figure(1, figsize=(8, 6))
+        ax = fig.add_subplot(111, projection="3d", elev=-150, azim=110)
+        ax.scatter(X1[:, 0], X1[:, 1], X1[:, 2], c="red", cmap=plt.cm.Set1, edgecolor="k", s=40, label = 1)
+        ax.scatter(X2[:, 0], X2[:, 1], X2[:, 2], c="blue", cmap=plt.cm.Set1, edgecolor="k", s=40, label = 2)
+        ax.legend()
+    except AttributeError:
+        # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
+        matplotlib.use('TkAgg')
+        fig = plt.figure(1, figsize=(8, 6))
+        ax = fig.add_subplot(111, projection="3d", elev=-150, azim=110)
+        ax.scatter(X1[:, 0], X1[:, 1], X1[:, 2], c="red", cmap=plt.cm.Set1, edgecolor="k", s=40, label = 1)
+        ax.scatter(X2[:, 0], X2[:, 1], X2[:, 2], c="blue", cmap=plt.cm.Set1, edgecolor="k", s=40, label = 2)
+        ax.legend()
+    plt.title("True data")
     plt.ylim(-8, 8)
     plt.grid()
     if show_plot:
@@ -54,19 +86,21 @@ def data_example_2(show_plot=True):
     X = np.vstack((X1, X2, X3, X4))
     X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
     try:
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
-        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green")
-        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black")
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label  = 1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
+        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label = 3)
+        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
     except AttributeError:
         # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
         matplotlib.use('TkAgg')
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
-        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green")
-        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black")
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label = 1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
+        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label = 3)
+        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
+    plt.title("True data")
     plt.ylim(0, 8)
     plt.grid()
+    plt.legend()
     if show_plot:
         plt.show()
     return X
@@ -88,19 +122,21 @@ def data_example_3(show_plot=True):
     X = np.vstack((X1, X2, X3, X4))
     X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
     try:
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
-        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green")
-        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black")
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label = 1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
+        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label = 3)
+        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
     except AttributeError:
         # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
         matplotlib.use('TkAgg')
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
-        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green")
-        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black")
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label = 1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
+        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label = 3)
+        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
+    plt.title("True data")
     plt.ylim(-15, 8)
     plt.grid()
+    plt.legend()
     if show_plot:
         plt.show()
     return X
@@ -127,21 +163,23 @@ def data_example_5(show_plot=True):
     X = np.vstack((X1, X2, X3, X4, X5))
     X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
     try:
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
-        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green")
-        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black")
-        plt.plot(X5[:, 0], X5[:, 1], '.', alpha=1, color="orange")
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label = 1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
+        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label = 3)
+        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
+        plt.plot(X5[:, 0], X5[:, 1], '.', alpha=1, color="orange", label = 5)
     except AttributeError:
         # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
         matplotlib.use('TkAgg')
-        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red")
-        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue")
-        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green")
-        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black")
-        plt.plot(X5[:, 0], X5[:, 1], '.', alpha=1, color="orange")
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label = 1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label = 2)
+        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label = 3)
+        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label = 4)
+        plt.plot(X5[:, 0], X5[:, 1], '.', alpha=1, color="orange", label = 5)
+    plt.title("True data")
     plt.ylim(-8, 8)
     plt.grid()
+    plt.legend()
     if show_plot:
         plt.show()
     return X
@@ -164,6 +202,8 @@ def data_example_6(show_plot=True):
             X = np.vstack((X, xs))
     X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
     plt.grid()
+    plt.legend()
+    plt.title("True data")
     if show_plot:
         plt.show()
     return X
