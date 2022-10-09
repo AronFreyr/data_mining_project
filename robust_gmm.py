@@ -3,20 +3,24 @@
 Robust Gaussian Mixture Model clustering
 """
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 from sklearn.metrics import silhouette_score
 from mpl_toolkits import mplot3d
 
+import generate_graphs
+
+
 class RobustGMM:
     
-    def __init__(self, c = None, eps = 0.001, gamma = 0.0001, max_iter = 1000):
+    def __init__(self, c=None, eps=0.001, gamma=0.0001, max_iter=1000,
+                 plot_intermediate_steps=False, plot_step_counter=1):
         self.c = c
         self.eps = eps
         self.gamma = gamma
         self.max_iter = max_iter
         self.beta = 1
+        self.plot_intermediate_steps = plot_intermediate_steps
+        self.plot_step_counter = plot_step_counter  # This exists because Pycharm won't generate more than 30 plots.
         
     def init_params(self, X):
         self.X = X
@@ -34,30 +38,37 @@ class RobustGMM:
         self.if_beta = True
         
     def fit(self, X):
-        #step 1
+        # step 1
         self.init_params(X)
-        #step 2
+        # step 2
         self.init_covariance()
-        #step 3
+        # step 3
         self.update_zs()
-        #step 4
+        # step 4
         self.update_mus()
         for w in range(self.max_iter):
             self.w = w
-            #step 5
+            # step 5
             self.update_alphas()
-            #step 6
+            # step 6
             self.update_beta()
-            #step 7
+            # step 7
             self.update_c()
-            #step 8
+            # step 8
             self.update_covs()
-            #step 9
+            # step 9
             self.update_zs()
-            #step 10
+            # step 10
             mus_prev = np.copy(self.mus)
             self.update_mus()
-            #step 11
+
+            # Generate plots
+            if self.plot_intermediate_steps:
+                if w % self.plot_step_counter == 0:
+                    plot_title = 'Clustering results after iteration ' + str(w)
+                    generate_graphs.plot_predictions(self.d, self.X, self.c, self.make_clusters(), plot_title=plot_title)
+
+            # step 11
             if max([np.linalg.norm(self.mus[k] - mus_prev[k]) for k in range(self.c)]) < self.eps:
                 break
             
@@ -68,7 +79,7 @@ class RobustGMM:
                 Dks[k][i] = np.linalg.norm(self.X[i] - self.mus[k])**2
             Dks[k] = np.sort(Dks[k])
         self.covs = np.array([Dks[k][Dks[k] > 0][int(np.sqrt(self.c))] * np.eye(self.d) for k in range(self.c)])
-        self.Q = np.min(Dks[Dks > 0])* np.eye(self.d)
+        self.Q = np.min(Dks[Dks > 0]) * np.eye(self.d)
         
     def update_zs(self):     
         for i in range(self.c):
@@ -79,7 +90,7 @@ class RobustGMM:
         self.mus = np.dot(self.zs.T, self.X)/(np.sum(self.zs, axis=0)).reshape(-1, 1)
     
     def update_alphas(self):
-        self.alphas_em = np.sum(self.zs, axis = 0)/self.n
+        self.alphas_em = np.sum(self.zs, axis=0)/self.n
         self.alphas_old = np.copy(self.alphas)
         self.E = np.sum(self.alphas_old*np.log(self.alphas_old))
         self.alphas = self.alphas_em + self.beta*self.alphas_old*(np.log(self.alphas_old) - self.E)
@@ -98,7 +109,7 @@ class RobustGMM:
         self.c = self.c - size
         self.cs.append(self.c)
         self.alphas = self.alphas[~self.idx]/np.sum(self.alphas[~self.idx])
-        self.zs = self.zs[:, ~self.idx]/np.sum(self.zs[:, ~self.idx], axis = 1, keepdims = True)
+        self.zs = self.zs[:, ~self.idx]/np.sum(self.zs[:, ~self.idx], axis=1, keepdims=True)
         
         if self.w >= 60 and self.cs[self.w-60] - self.cs[self.w] == 0:
             self.beta = 0
@@ -109,9 +120,9 @@ class RobustGMM:
         arr = []
         for i in range(self.c):
             vec = self.X - self.mus[i]          
-            #26
+            # 26
             self.covs[i] = np.dot(self.zs[:, i]*vec.T, vec)/np.sum(self.zs, axis=0)[i]
-            #28
+            # 28
             self.covs[i] = ((1-self.gamma)*self.covs[i]) + (self.gamma*self.Q)
             arr.append(np.copy(self.covs[i]))
         self.covs = np.array(arr)
@@ -123,8 +134,8 @@ class RobustGMM:
         return self.clusters
     
     def predict(self, Y):
-        #predict on unseen data
-        #find to which cluster Mahalenobis distance is minimized
+        # predict on unseen data
+        # find to which cluster Mahalenobis distance is minimized
         dists = []
         for p in range(Y.shape[0]):
             lista = []
@@ -136,69 +147,4 @@ class RobustGMM:
         return np.array(dists)
      
     def plot_predictions(self):
-        np.random.seed(1)
-        if self.d <= 3:
-            if self.d == 1:
-                X_with_preds = np.c_[self.X, self.clusters]
-                colors = [np.random.rand(3,) for _ in range(self.n)]
-                for i in range(self.X.shape[0]):
-                    plt.plot(self.X[i], '.', color=colors[int(X_with_preds[i][1])])
-                plt.grid()
-                plt.tick_params(
-                    axis='x',          
-                    which='both',     
-                    bottom=False,      
-                    top=False,         
-                    labelbottom=False)
-                plt.title("Clustering results")
-                plt.show()
-                    
-            if self.d == 2:
-                fig, ax = plt.subplots()
-                for i, cluster in enumerate(np.unique(self.clusters)):
-                    c = self.X[self.clusters == i]
-                    if np.unique(len(np.unique(self.clusters))) < 6:
-                        ax.scatter(c[:, 0], c[:, 1], color=np.append(np.random.rand(3,), 0.5), edgecolor = "k", linewidth = 0.3, label = i+1, zorder = 2)
-                    else:
-                        ax.scatter(c[:, 0], c[:, 1], color=np.append(np.random.rand(3,), 0.5), edgecolor = "k", linewidth = 0.3, zorder = 2)
-                ax.legend()
-                plt.title("Clustering results")
-                plt.grid()
-                plt.show()
-
-            if self.d == 3:
-                fig = plt.figure(1, figsize=(8, 6))
-                ax = fig.add_subplot(111, projection="3d")
-                for i, cluster in enumerate(np.unique(self.clusters)):
-                    c = self.X[self.clusters == i]
-                    if np.unique(len(np.unique(self.clusters))) < 10:
-                        ax.scatter(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black", label  = i+1, zorder = 2)
-                    else:
-                        ax.scatter(c[:, 0], c[:, 1],  c[:, 2], color=np.append(np.random.rand(3,), 0.5), edgecolor = "black", zorder = 2)
-                plt.title("Clustering results")
-                ax.legend()
-                plt.grid()
-                plt.show()
-        else:
-            raise ValueError("This method can only plot 1-3D data")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        generate_graphs.plot_predictions(self.d, self.X, self.c, self.clusters)

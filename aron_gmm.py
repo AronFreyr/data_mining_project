@@ -1,11 +1,11 @@
 import numpy as np
 from scipy.stats import multivariate_normal
-import matplotlib
-import matplotlib.pyplot as plt
 
 from gmm import generate_data_for_gmm
+from generate_graphs import plot_predictions
 
 # WORK IN PROGRESS!!!
+
 
 def aron_gmm():
     data = generate_data_for_gmm(show_plot=False)
@@ -104,69 +104,6 @@ def predict(Y, mus, covs):
             lista.append(np.sqrt(m))
         dists.append(np.argmin(lista))
     return np.array(dists)
-
-
-def plot_predictions(dims, data, z_hat, c_input, clusters):
-    #clusters = np.argmax(z_hat, axis=1)
-    print('clusters', clusters)
-    if dims <= 3:
-        if dims == 1:
-            X_with_preds = np.c_[data, clusters]
-            colors = [np.random.rand(3, ) for _ in range(c_input)]
-            for i in range(data.shape[0]):
-                plt.plot(data[i], '.', alpha=1, color=colors[int(X_with_preds[i][1])])
-            plt.grid()
-            plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-            plt.show()
-
-        if dims == 2:
-            #for i, cluster in enumerate(np.unique(clusters)):
-            #for i, cluster in enumerate(list(set(clusters))):
-            for i in list(set(clusters)):
-                circle_list = []
-                c = data[clusters == i]
-                #print('i', i)
-                #print(c)
-                #print('cluster', cluster)
-                #print('median X:', np.median(c[:, 0]))
-                #print('median Y:', np.median(c[:, 1]))
-                median_x = float(np.median(c[:, 0]))
-                median_y = float(np.median(c[:, 1]))
-                radius = np.sqrt((c[:, 0] - median_x)**2 + (c[:, 1] - median_y)**2)
-                radius = np.percentile(radius, 100)
-                print('radius', radius)
-                matplotlib.use('TkAgg')
-                #print(median_x)
-                #try:
-                    #for x in c:
-                    #    print(x)
-                print('------')
-                plt.plot(c[:, 0], c[:, 1], '.', alpha=1, color=np.random.rand(3, ))
-                #except AttributeError:
-                # Fix for the error: AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
-
-                #fig, ax = plt.subplots()
-                #plt.plot(c[:, 0], c[:, 1], '.', alpha=1, color=np.random.rand(3, ))
-                plt.plot(c[:, 0], c[:, 1], '.', alpha=1, color=np.random.rand(3, ))
-                circle = plt.Circle((median_x, median_y), radius, color='r', fill=False)
-                circle_list.append(circle)
-                #plt.gca().add_artist(circle)
-                #plt.gca().add_patch(circle)
-                #ax.add_artist(circle)
-                #for x in circle_list:
-                #    ax.add_artist(x)
-            plt.grid()
-            plt.show()
-
-        if dims == 3:
-            ax = plt.axes(projection='3d')
-            for i, cluster in enumerate(np.unique(clusters)):
-                c = dims[clusters == i]
-                ax.scatter3D(c[:, 0], c[:, 1], c[:, 2], alpha=1, color=np.random.rand(3, ))
-            plt.grid()
-            plt.show()
-    else:
-        raise ValueError("This method can only plot 1-3D data")
 
 
 if __name__ == '__main__':
