@@ -83,6 +83,31 @@ def data_example_2(show_plot=True):
         plt.show()
     return X
 
+def data_example_2_2(show_plot=True):
+    np.random.seed(1)
+    mu1 = np.array([0, 3])
+    mu2 = np.array([0, 5])
+    mu3 = np.array([0, 7])
+    mu4 = np.array([0, 5])
+    cov = np.array([[1.2, 0], [0, 0.01]])
+    cov2 = np.array([[0.01, 0], [0, 0.8]])
+
+    X1 = multivariate_normal.rvs(mu1, cov, size=10, random_state=1)
+    X2 = multivariate_normal.rvs(mu2, cov, size=10, random_state=1)
+    X3 = multivariate_normal.rvs(mu3, cov, size=10, random_state=1)
+    X4 = multivariate_normal.rvs(mu4, cov2, size=10, random_state=1)
+    X = np.vstack((X1, X2, X3, X4))
+    X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
+    if show_plot:
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label=1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label=2)
+        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label=3)
+        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label=4)
+        plt.title("True data")
+        plt.grid()
+        plt.legend()
+        plt.show()
+    return X
 
 def data_example_3(show_plot=True):
     np.random.seed(1)
@@ -144,6 +169,37 @@ def data_example_5(show_plot=True):
         plt.show()
     return X
 
+def data_example_5_2(show_plot=True):
+    np.random.seed(1)
+    mu1 = np.array([0, 0])
+    mu2 = np.array([0, 0])
+    mu3 = np.array([-1.5, 1.5])
+    mu4 = np.array([1.5, 1.5])
+    mu5 = np.array([0, -2])
+    cov1 = np.array([[0.01, 0], [0, 1.25]])
+    cov2 = np.array([[8, 0], [0, 8]])
+    cov3 = np.array([[0.2, 0], [0, 0.015]])
+    cov4 = np.array([[0.2, 0], [0, 0.015]])
+    cov5 = np.array([[1, 0], [0, 0.2]])
+
+    X1 = multivariate_normal.rvs(mu1, cov1, size=20, random_state=1)
+    X2 = multivariate_normal.rvs(mu2, cov2, size=20, random_state=1)
+    X3 = multivariate_normal.rvs(mu3, cov3, size=20, random_state=1)
+    X4 = multivariate_normal.rvs(mu4, cov4, size=20, random_state=1)
+    X5 = multivariate_normal.rvs(mu5, cov5, size=20, random_state=1)
+    X = np.vstack((X1, X2, X3, X4, X5))
+    X = np.take(X, np.random.rand(X.shape[0]).argsort(), axis=0, out=X)
+    if show_plot:
+        plt.plot(X1[:, 0], X1[:, 1], '.', alpha=1, color="red", label=1)
+        plt.plot(X2[:, 0], X2[:, 1], '.', alpha=1, color="blue", label=2)
+        plt.plot(X3[:, 0], X3[:, 1], '.', alpha=1, color="green", label=3)
+        plt.plot(X4[:, 0], X4[:, 1], '.', alpha=1, color="black", label=4)
+        plt.plot(X5[:, 0], X5[:, 1], '.', alpha=1, color="orange", label=5)
+        plt.title("True data")
+        plt.grid()
+        plt.legend()
+        plt.show()
+    return X
 
 def data_example_6(show_plot=True):
     X = np.empty((0, 2))
